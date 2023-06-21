@@ -2,8 +2,11 @@ package com.automation.tests;
 
 import static org.testng.Assert.assertEquals;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -11,6 +14,7 @@ import java.util.Set;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
@@ -622,7 +626,6 @@ public class SfdcAuromationScripts extends BaseTest{
 		WebElement acctdaysele = driver.findElement(By.linkText("Accounts with last activity > 30 days"));
 		clickElement(acctdaysele, "Accounts with last 30 days ");
 		
-		log.info("title -->"+getPageTitle());
 		Thread.sleep(3000);
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 		LocalDateTime ld = LocalDateTime.now();
@@ -1139,6 +1142,7 @@ public class SfdcAuromationScripts extends BaseTest{
 		log.info("Test Script TC-35 is started successfully");
 		boolean flag = false;
 		String removetab = null;
+		String afterRemoved ="";
 		loginPage();
 		WebElement allTab = driver.findElement(By.id("AllTab_Tab"));
 		clickElement(allTab, "All Tab ");
@@ -1157,15 +1161,23 @@ public class SfdcAuromationScripts extends BaseTest{
 		WebElement selectelem = driver.findElement(By.id("duel_select_1"));
 		Select selectall = new Select(selectelem);
 		List<WebElement> selectlist = selectall.getOptions();
-		
 		for(WebElement list: selectlist) {
-			if(list.equals(removetab)) {
+			if(!list.equals(removetab)) {
+				if((list.getText()).contains("Home")) {
+					afterRemoved = "Home";
+				}else {
+				afterRemoved += list.getText();
+				}
+			}else {
 				flag = true;
 			}
 		}
+		System.out.println("remobed-->"+afterRemoved);
 		
 		if(flag == true) {
 			log.info(removetab+" is not removed from the All Tabs");
+			}else {
+			log.info(removetab+" tab is removed");
 			}
 				
 		WebElement save = driver.findElement(By.xpath("//*[@id=\"bottomButtonRow\"]/input[1]"));
@@ -1175,9 +1187,104 @@ public class SfdcAuromationScripts extends BaseTest{
 		Thread.sleep(3000);
 		loginPage();
 		WebElement tabs = driver.findElement(By.id("tabBar"));
-		System.out.println(tabs.getText());
+		log.info(tabs.getText());
+		Assert.assertEquals(afterRemoved.trim(), tabs.getText().trim());
 		
 		log.info("Test Script TC-35 is executed successfully");
 	}
+	
+	//Test ID TC-36
+	@Test
+	public static void sfdcEvent() throws InterruptedException{
+		log.info("Test Script TC-36 is started successfully");
+		loginPage();
+		WebElement home = driver.findElement(By.linkText("Home"));
+		clickElement(home, "Home Tab ");
+		Thread.sleep(8000);
+		advertisement("tryLexDialogX");
+		Thread.sleep(3000);
+		WebElement userElem = driver.findElement(By.xpath("//*[@id=\"ptBody\"]/div/div[2]/span[1]/h1/a"));
+		String usrId = userElem.getText();
+		WebElement datelink = driver.findElement(By.xpath("//*[@id=\"ptBody\"]/div/div[2]/span[2]/a"));
+		clickElement(datelink, "Date Link ");
+		Thread.sleep(3000);
+		WebElement timelink = driver.findElement(By.xpath("//*[@id=\"p:f:j_id25:j_id61:26:j_id64\"]/a"));
+		clickElement(timelink, "Time link ");
+		String parentwindow = driver.getWindowHandle();
+		WebElement subject = driver.findElement(By.xpath("//*[@id=\"ep\"]/div[2]/div[4]/table/tbody/tr[2]/td[2]/div/a"));
+		clickElement(subject, "Subject combo box");
+			
+		Set<String> allwindowHandle = driver.getWindowHandles();
+		for(String handle: allwindowHandle) {
+			if(!parentwindow.equals(handle)) {
+				driver.switchTo().window(handle);
+				WebElement other = driver.findElement(By.xpath("/html/body/div[2]/ul/li[5]/a"));
+				clickElement(other, "other link ");
+				Thread.sleep(3000);
+			}
+	}
+		driver.switchTo().window(parentwindow);
+		Thread.sleep(3000);
+		WebElement endfield = driver.findElement(By.xpath("//*[@id=\"EndDateTime_time\"]"));
+		clickElement(endfield, "End field ");
+		WebElement saveBtn = driver.findElement(By.name("save"));
+		clickElement(saveBtn, "Save Button");
+		WebElement page = driver.findElement(By.xpath("//*[@id=\"bCalDiv\"]/div/div[1]/div[1]/h1"));
+		Assert.assertEquals(page.getText(), "Calendar for "+usrId+" - Day View");
+		log.info("Test Script TC-36 is executed successfully");
+	}
+	
+//Test ID Tc-37
+	@Test
+	public static void sfdcBlockingAnEvent() throws InterruptedException{
+		log.info("Test Script TC-37 is started successfully");
+		loginPage();
+		WebElement home = driver.findElement(By.linkText("Home"));
+		clickElement(home, "Home Tab ");
+		Thread.sleep(8000);
+		advertisement("tryLexDialogX");
+		Thread.sleep(3000);
+		WebElement datelink = driver.findElement(By.xpath("//*[@id=\"ptBody\"]/div/div[2]/span[2]/a"));
+		clickElement(datelink, "Date Link ");
+		Thread.sleep(3000);
+		WebElement timelink = driver.findElement(By.xpath("//*[@id=\"p:f:j_id25:j_id61:28:j_id64\"]/a"));
+		clickElement(timelink, "Time link ");
+		String parentwindow = driver.getWindowHandle();
+		WebElement subject = driver.findElement(By.xpath("//*[@id=\"ep\"]/div[2]/div[4]/table/tbody/tr[2]/td[2]/div/a"));
+		clickElement(subject, "Subject combo box");
+			
+		Set<String> allwindowHandle = driver.getWindowHandles();
+		for(String handle: allwindowHandle) {
+			if(!parentwindow.equals(handle)) {
+				driver.switchTo().window(handle);
+				WebElement other = driver.findElement(By.xpath("/html/body/div[2]/ul/li[5]/a"));
+				clickElement(other, "other link ");
+				Thread.sleep(3000);
+			}
+	}
+		driver.switchTo().window(parentwindow);
+		Thread.sleep(3000);
+		WebElement recurrence = driver.findElement(By.id("IsRecurrence"));
+		clickElement(recurrence, "Recurence check box");
+		WebElement radiobtn = driver.findElement(By.id("rectypeftw"));
+		clickElement(radiobtn, "Weekly radio button");
+		int noOfDays = 14; 
+	     Calendar cal = Calendar.getInstance();
+	     cal.add(Calendar.DAY_OF_YEAR, noOfDays);
+	     Date date = cal.getTime();
+		SimpleDateFormat  sdf = new SimpleDateFormat("MM/dd/yyyy");
+		WebElement endDate = driver.findElement(By.id("RecurrenceEndDateOnly"));
+		enterText(endDate, sdf.format(date), "End date ");
+		Thread.sleep(5000);
+		WebElement saveBtn = driver.findElement(By.name("save"));
+		clickElement(saveBtn, "Save Button");
 		
+		WebElement monthlyView = driver.findElement(By.xpath("//*[@id=\"bCalDiv\"]/div/div[2]/span[2]/a[3]/img"));
+		clickElement(monthlyView, "Monthly view");
+		
+		WebElement page = driver.findElement(By.xpath("//*[@id=\"bodyCell\"]/div[1]/div[1]/div[1]/h1"));
+		Assert.assertEquals(page.getText()+" ~ Salesforce - Developer Edition", getPageTitle());
+		log.info("Test Script TC-37 is executed successfully");
+		
+	}
 }
